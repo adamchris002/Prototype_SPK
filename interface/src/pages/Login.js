@@ -8,13 +8,19 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../components/AuthContext";
 import axios from "axios";
 
 const Login = (props) => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { openLoginPage, setOpenLoginPage } = props;
+  const {
+    openLoginPage,
+    setOpenLoginPage,
+    setIsLoggedIn,
+    setUsernameUniversal,
+  } = props;
+  const { message, clearMessage } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [popupMessage, setPopupMessage] = useState("");
@@ -22,13 +28,13 @@ const Login = (props) => {
   const [messageStatus, setMessageStatus] = useState(false);
 
   useEffect(() => {
-    const message = location.state && location.state.message;
     if (message) {
       setPopupMessage(message);
       setMessageStatus(true);
       setPopupCondition(true);
+      clearMessage();
     }
-  }, [location.state]);
+  }, [message, clearMessage]);
 
   const handleLogin = () => {
     const loginData = { username: username, password: password };
@@ -41,8 +47,17 @@ const Login = (props) => {
         method: "POST",
         url: "http://localhost:3000/user/login",
         data: loginData,
-      }).then(() => {
-        setOpenLoginPage(false);
+      }).then((result) => {
+        if (result.data === null) {
+          setPopupMessage("The username or password you entered is incorrect.");
+          setPopupCondition(true);
+          setMessageStatus(false);
+        } else {
+          setIsLoggedIn(true);
+          setUsernameUniversal(username.toString());
+          setOpenLoginPage(false);
+          navigate("/home");
+        }
       });
     }
   };
@@ -72,7 +87,7 @@ const Login = (props) => {
         >
           <div style={{ padding: "16px", width: "100%" }}>
             <Typography sx={{ color: "black" }} fontSize={36} fontWeight={500}>
-              Logins
+              Login
             </Typography>
             <div
               style={{

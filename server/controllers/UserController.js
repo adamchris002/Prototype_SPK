@@ -2,6 +2,17 @@ const { users } = require("../models");
 const { Op } = require("sequelize");
 
 class UserController {
+  static async getUserInfo(req, res) {
+    try {
+      const {username} = req.query
+      let result = await users.findOne({
+        where: { username: username },
+      });
+      res.json(result);
+    } catch (err) {
+      res.json(err);
+    }
+  }
   static async login(req, res) {
     try {
       const { username, password } = req.body;

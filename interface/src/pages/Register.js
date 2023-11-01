@@ -1,12 +1,20 @@
-import { Alert, Backdrop, Button, Snackbar, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Backdrop,
+  Button,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../components/AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Register = (props) => {
   const navigate = useNavigate();
-
+  const { setSuccessMessage } = useAuth();
   const { openLoginPage } = props;
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
@@ -30,19 +38,25 @@ const Register = (props) => {
         method: "POST",
         url: "http://localhost:3000/user/register",
         data: registerData,
-      }).then(() => {
-        handleNavigate("Yay, You have successfully created an account!");
-      });
+      })
+        .then((result) => {
+          if (result.status === 200) {
+            setSuccessMessage("Yay, you have successfully created an account!");
+            navigate("/");
+          }
+        })
+        .catch((error) => {
+          if (error.response) {
+            popupCondition(true);
+            setPopupMessage(error.response.data.error);
+          }
+        });
     }
-  };
-
-  const handleNavigate = (message) => {
-    navigate("/", { state: { message } });
   };
 
   const handleCloseAlert = () => {
     setPopupCondition(false);
-  }
+  };
 
   return (
     <div>
