@@ -1,5 +1,6 @@
 const UserController = require("./UserController")
+const VendorController = require("./VendorController")
 
 module.exports = {
-    UserController,
+    UserController, VendorController
 }
