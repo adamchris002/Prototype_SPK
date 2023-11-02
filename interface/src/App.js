@@ -1,10 +1,16 @@
 import "./App.css";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Login from "./pages/Login";
 import { useState } from "react";
 import Register from "./pages/Register";
 import LandingPage from "./pages/LandingPage";
 import ResponsiveAppBar from "./components/Navbar";
+import CountPage from "./pages/CountPage";
 
 function App() {
   const [openLoginPage, setOpenLoginPage] = useState(true);
@@ -13,7 +19,7 @@ function App() {
   return (
     <div className="App">
       <Router>
-        <ResponsiveAppBar/>
+        <ResponsiveAppBar />
         <Routes>
           <Route
             path="/"
@@ -30,8 +36,21 @@ function App() {
             path="/register"
             element={<Register openLoginPage={openLoginPage} />}
           />
-          
-          <Route path="/home" element={ isLoggedIn ? (<LandingPage usernameUniversal={usernameUniversal} />) : (<Navigate to="/" />)} />
+
+          <Route
+            path="/home"
+            element={
+              isLoggedIn ? (
+                <LandingPage usernameUniversal={usernameUniversal} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
+          />
+          <Route
+            path="/dms"
+            element={isLoggedIn ? <CountPage /> : <Navigate to="/" />}
+          />
         </Routes>
       </Router>
     </div>
