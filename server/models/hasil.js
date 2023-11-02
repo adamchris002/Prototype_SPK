@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   hasil.init({
     name: DataTypes.STRING,
-    nilai_tertinggi: DataTypes.INTEGER
+    nilai_tertinggi: DataTypes.FLOAT
   }, {
     sequelize,
     modelName: 'hasil',

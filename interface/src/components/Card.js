@@ -12,13 +12,13 @@ const OutlinedCard = (props) => {
     <Box sx={{ minWidth: 275 }}>
       <Card sx={{backgroundColor: "#Edeeee"}} variant="outlined">
         <CardContent>
-          <Typography variant="h5" component="div">
+          <Typography variant="h5" component="div" color="text.secondary">
             {cardTitle}
           </Typography>
-          <Typography sx={{ m: 3,  }} color="text.secondary">
+          <Typography variant="h2" sx={{ m: 3,  }} >
             {count}
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="body2" color="text.secondary">
             {description}
             <br />
           </Typography>

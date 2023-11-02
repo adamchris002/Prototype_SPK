@@ -3,9 +3,25 @@ import React, { useEffect, useState } from "react";
 import VendorTable from "../components/Table";
 import VendorModal from "../components/Modal";
 import EditIcon from "@mui/icons-material/Edit";
-import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  IconButton,
+  InputAdornment,
+  Paper,
+  Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
 
-const CountPage = () => {
+const CountPage = (props) => {
   const [vendorsData, setVendorsData] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
@@ -30,25 +46,48 @@ const CountPage = () => {
   const [bobotWaktu, setBobotWaktu] = useState(null);
   const [bobotKualitas, setBobotKualitas] = useState(null);
   const [bobotTempo, setBobotTempo] = useState(null);
-
   const [finalSawResult, setFinalSawResult] = useState([]);
-
   const [disableWeight, setDisableWeight] = useState(false);
-
   const [hasilNormalisasi, setHasilNormalisasi] = useState([]);
 
-  console.log(finalSawResult)
+  //for alert
+  const [popupMessage, setPopupMessage] = useState("");
+  const [messageStatus, setMessageStatus] = useState(false);
+  const [popupCondition, setPopupCondition] = useState(false);
+
+  //for result table
+  const [resultTableData, setResultTableData] = useState([]);
+  console.log(resultTableData);
 
   useEffect(() => {
     if (checkUpdate) {
       axios({
         method: "GET",
-        url: "http://localhost:3000/vendor/getVendors",
+        url: "http://localhost:3000/hasil/getAllHasil",
       }).then((result) => {
+        setResultTableData(result.data);
         setCheckUpdate(false);
       });
     }
-  }, []);
+  }, [checkUpdate]);
+
+  const calculateTotalBobot = () => {
+    const totalBobot =
+      parseFloat(bobotHarga) +
+      parseFloat(bobotBahan) +
+      parseFloat(bobotModel) +
+      parseFloat(bobotWaktu) +
+      parseFloat(bobotKualitas) +
+      parseFloat(bobotTempo);
+
+    return totalBobot;
+  };
+
+  const handleCloseAlert = () => {
+    setPopupMessage("");
+    setPopupCondition(false);
+    setMessageStatus(false);
+  };
 
   useEffect(() => {
     if (checkUpdate) {
@@ -103,6 +142,9 @@ const CountPage = () => {
       setTempoPembayaran("");
       setCheckUpdate(true);
       setOpenModal(false);
+      setPopupCondition(true);
+      setMessageStatus(true);
+      setPopupMessage("You have successfully created an account!");
     });
   };
 
@@ -112,6 +154,9 @@ const CountPage = () => {
       url: `http://localhost:3000/vendor/deleteVendor/${id}`,
     }).then(() => {
       setCheckUpdate(true);
+      setPopupCondition(true);
+      setMessageStatus(true);
+      setPopupMessage("You have successfully deleted an account!");
     });
   };
 
@@ -188,7 +233,24 @@ const CountPage = () => {
       (max, obj) => (obj.value > max.value ? obj : max),
       finalResult[0]
     );
+
+    handlePostHasil(highestValueObject);
+
     return setFinalSawResult(highestValueObject);
+  };
+
+  const handlePostHasil = (highestValueObject) => {
+    let dataHasil = {
+      name: highestValueObject.name,
+      nilai_tertinggi: highestValueObject.value,
+    };
+    axios({
+      method: "POST",
+      url: "http://localhost:3000/hasil/addHasil",
+      data: dataHasil,
+    }).then((result) => {
+      console.log("test");
+    });
   };
 
   const handleCountFinalResult = (finalResult, allCountResult) => {
@@ -244,7 +306,7 @@ const CountPage = () => {
           maxWidth: "100vw",
         }}
       >
-        <Typography fontSize={36} fontWeight={1000}>
+        <Typography fontSize={36} fontWeight={600}>
           Sistem Rekomendasi Vendor
         </Typography>
       </div>
@@ -267,7 +329,12 @@ const CountPage = () => {
           margin: "16px",
         }}
       >
-        <div style={{ boxShadow: "10px 10px 20px rgba(0, 0, 0, 0.2)" }}>
+        <div
+          style={{
+            boxShadow: "10px 10px 20px rgba(0, 0, 0, 0.2)",
+            width: "50vw",
+          }}
+        >
           <div
             style={{
               display: "flex",
@@ -276,14 +343,13 @@ const CountPage = () => {
             }}
           >
             <Typography fontSize={32} fontWeight={400}>
-              List Vendor
+              LIST VENDOR
             </Typography>
           </div>
 
           <div
             style={{
               margin: "24px 16px",
-              width: "60vw",
             }}
           >
             <VendorTable
@@ -316,6 +382,7 @@ const CountPage = () => {
           style={{
             margin: "0px 16px 0px 32px",
             boxShadow: "10px 10px 20px rgba(0, 0, 0, 0.2)",
+            width: "50vw",
           }}
         >
           <div
@@ -326,7 +393,7 @@ const CountPage = () => {
             }}
           >
             <Typography fontSize={32} fontWeight={400}>
-              Perhitungan
+              Bobot
             </Typography>
           </div>
           <Box
@@ -348,16 +415,19 @@ const CountPage = () => {
               }}
             >
               <Typography id="modal-modal-title" variant="h6" component="h2">
-                Masukkan Bobot Sesuai Kriteria
+                {"Masukkan Bobot Sesuai Kriteria"}
               </Typography>
               <IconButton
+                disabled={!disableWeight}
+                style={{ marginLeft: "16px" }}
                 onClick={() => {
                   setDisableWeight(false);
                 }}
               >
-                <EditIcon sx={{ color: "blue" }} />
+                <EditIcon sx={{ color: !disableWeight ? "grey" : "blue" }} />
               </IconButton>
             </Box>
+            <Typography>{"(Jumlah bobot memiliki jumlah 100%)"}</Typography>
             <Box
               style={{
                 display: "flex",
@@ -369,12 +439,17 @@ const CountPage = () => {
               <Typography id="modal-modal-description">Harga:</Typography>
               <TextField
                 disabled={disableWeight ? true : false}
-                value={hargaVendor}
+                value={bobotHarga}
                 onChange={(event) => {
                   setBobotHarga(event.target.value);
                 }}
                 type="number"
                 size="small"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">%</InputAdornment>
+                  ),
+                }}
               />
             </Box>
             <Box
@@ -390,12 +465,17 @@ const CountPage = () => {
               </Typography>
               <TextField
                 disabled={disableWeight ? true : false}
-                value={kualitasBahan}
+                value={bobotBahan}
                 onChange={(event) => {
                   setBobotBahan(event.target.value);
                 }}
                 type="number"
                 size="small"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">%</InputAdornment>
+                  ),
+                }}
               />
             </Box>
             <Box
@@ -411,12 +491,17 @@ const CountPage = () => {
               </Typography>
               <TextField
                 disabled={disableWeight ? true : false}
-                value={modelSeragam}
+                value={bobotModel}
                 onChange={(event) => {
                   setBobotModel(event.target.value);
                 }}
                 type="number"
                 size="small"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">%</InputAdornment>
+                  ),
+                }}
               />
             </Box>
             <Box
@@ -432,12 +517,17 @@ const CountPage = () => {
               </Typography>
               <TextField
                 disabled={disableWeight ? true : false}
-                value={waktuPengerjaan}
+                value={bobotWaktu}
                 onChange={(event) => {
                   setBobotWaktu(event.target.value);
                 }}
                 type="number"
                 size="small"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">%</InputAdornment>
+                  ),
+                }}
               />
             </Box>
             <Box
@@ -453,12 +543,17 @@ const CountPage = () => {
               </Typography>
               <TextField
                 disabled={disableWeight ? true : false}
-                value={kualitasProduk}
+                value={bobotKualitas}
                 onChange={(event) => {
                   setBobotKualitas(event.target.value);
                 }}
                 type="number"
                 size="small"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">%</InputAdornment>
+                  ),
+                }}
               />
             </Box>
             <Box
@@ -474,12 +569,17 @@ const CountPage = () => {
               </Typography>
               <TextField
                 disabled={disableWeight ? true : false}
-                value={tempoPembayaran}
+                value={bobotTempo}
                 onChange={(event) => {
                   setBobotTempo(event.target.value);
                 }}
                 type="number"
                 size="small"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="start">%</InputAdornment>
+                  ),
+                }}
               />
             </Box>
             <div
@@ -508,7 +608,9 @@ const CountPage = () => {
                   bobotModel === "" ||
                   bobotWaktu === "" ||
                   bobotKualitas === "" ||
-                  bobotTempo === ""
+                  bobotTempo === "" ||
+                  calculateTotalBobot() !== 100 ||
+                  disableWeight !== false
                     ? true
                     : false
                 }
@@ -517,13 +619,14 @@ const CountPage = () => {
               </Button>
             </div>
           </Box>
-          
         </div>
       </div>
       <Button
-        style={{height: "40%",}}
+        disabled={hasilNormalisasi.length === 0 ? true : false}
+        style={{ height: "40%", marginTop: "16px" }}
         onClick={() => {
           handleSaveAndCountResult();
+          setCheckUpdate(true);
         }}
         variant="contained"
       >
@@ -537,7 +640,7 @@ const CountPage = () => {
             height: 100,
             padding: "12px",
             justifyContent: "center",
-            borderRadius:"10px",
+            borderRadius: "10px",
             boxShadow: "10px 10px 20px rgba(0, 0, 0, 0.2)",
           }}
         >
@@ -546,7 +649,6 @@ const CountPage = () => {
               display: "flex",
               justifyContent: "space-between",
               margin: "16px",
-              
             }}
           >
             <Typography fontSize={16} fontWeight={400}>
@@ -561,7 +663,6 @@ const CountPage = () => {
               display: "flex",
               justifyContent: "space-between",
               margin: "8px",
-              
             }}
           >
             <Typography fontSize={24} fontWeight={600}>
@@ -572,7 +673,52 @@ const CountPage = () => {
             </Typography>
           </div>
         </div>
-      ) : ""}
+      ) : (
+        ""
+      )}
+      <div
+        style={{
+          width: "100vw",
+          display: "flex",
+          justifyContent: "center",
+          margin: "16px",
+        }}
+      >
+        <Typography fontSize={28} fontWeight={600}>
+          History Perhitungan
+        </Typography>
+      </div>
+      <div
+        style={{
+          width: "100vw",
+          display: "flex",
+          justifyContent: "center",
+          margin: "16px",
+        }}
+      >
+        <div>
+          <TableContainer component={Paper}>
+            <Table sx={{ minWidth: 650 }} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell align="left">Name</TableCell>
+                  <TableCell align="left">Score</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {resultTableData.map((row) => (
+                  <TableRow key={row.name}>
+                    <TableCell component="th" scope="row">
+                      {row.name}
+                    </TableCell>
+                    <TableCell align="left">{row.nilai_tertinggi}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      </div>
       <VendorModal
         openModal={openModal}
         namaVendor={namaVendor}
@@ -598,6 +744,19 @@ const CountPage = () => {
         handleUpdateVendor={handleUpdateVendor}
         updateRowId={updateRowId}
       />
+      <Snackbar
+        open={popupCondition}
+        autoHideDuration={6000}
+        onClose={handleCloseAlert}
+      >
+        <Alert
+          onClose={handleCloseAlert}
+          severity={messageStatus ? "success" : "error"}
+          sx={{ width: "100%" }}
+        >
+          {popupMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

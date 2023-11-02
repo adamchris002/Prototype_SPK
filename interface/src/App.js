@@ -11,11 +11,13 @@ import Register from "./pages/Register";
 import LandingPage from "./pages/LandingPage";
 import ResponsiveAppBar from "./components/Navbar";
 import CountPage from "./pages/CountPage";
+import NotFoundPage from "./components/NotFoundPage";
 
 function App() {
   const [openLoginPage, setOpenLoginPage] = useState(true);
   const [usernameUniversal, setUsernameUniversal] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   return (
     <div className="App">
       <Router>
@@ -41,7 +43,10 @@ function App() {
             path="/home"
             element={
               isLoggedIn ? (
-                <LandingPage usernameUniversal={usernameUniversal} />
+                <LandingPage
+                  usernameUniversal={usernameUniversal}
+                  isLoggedIn={isLoggedIn}
+                />
               ) : (
                 <Navigate to="/" />
               )
@@ -49,8 +54,15 @@ function App() {
           />
           <Route
             path="/dms"
-            element={isLoggedIn ? <CountPage /> : <Navigate to="/" />}
+            element={
+              isLoggedIn ? (
+                <CountPage isLoggedIn={isLoggedIn} />
+              ) : (
+                <Navigate to="/" />
+              )
+            }
           />
+          <Route path="/*" element={<Navigate to="/home" />} />
         </Routes>
       </Router>
     </div>

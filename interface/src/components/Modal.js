@@ -231,6 +231,7 @@ const VendorModal = (props) => {
           </Button>
         </Box>
       </Backdrop>
+      
     </div>
   );
 };

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -156,8 +155,7 @@ const EnhancedTable = (props) => {
   const [orderBy, setOrderBy] = useState("calories");
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const totalPages = Math.ceil(data.length / rowsPerPage);
+  const totalPages = Math.ceil(data.length / (tableCondition ? 5 : 3));
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -195,12 +193,8 @@ const EnhancedTable = (props) => {
 
   const isSelected = (id) => selected.indexOf(id) !== -1;
 
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - data.length) : 0;
-
-  const startIndex = tableCondition ? page * rowsPerPage : page * 3
-  const endIndex = tableCondition ? startIndex + rowsPerPage : startIndex + 3;
+  const startIndex = page * (tableCondition ? 5 : 3);
+  const endIndex = startIndex + (tableCondition ? 5 : 3);
   const visibleRows = React.useMemo(
     () =>
       stableSort(data, getComparator(order, orderBy)).slice(
@@ -287,11 +281,6 @@ const EnhancedTable = (props) => {
                   </TableRow>
                 );
               })}
-              {emptyRows > 0 && (
-                <TableRow>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
             </TableBody>
           </Table>
         </TableContainer>
