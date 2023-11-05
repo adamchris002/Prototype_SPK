@@ -72,7 +72,7 @@ const LandingPage = (props) => {
           count={`${hasilData.length}`}
           description={`Times`}
         />
-        <OutlinedCard cardTitle={"Users"} count={"1"} description={"Account"} />
+        <OutlinedCard cardTitle={"Number of Vendors"} count={vendorsData.length} description={"Vendors"} />
       </div>
       <div
         style={{

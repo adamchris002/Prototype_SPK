@@ -151,6 +151,8 @@ const EnhancedTable = (props) => {
     tableCondition,
   } = props;
 
+  // console.log(data)
+
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState("calories");
   const [selected, setSelected] = useState([]);

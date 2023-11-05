@@ -47,6 +47,7 @@ const CountPage = (props) => {
   const [bobotKualitas, setBobotKualitas] = useState(null);
   const [bobotTempo, setBobotTempo] = useState(null);
   const [finalSawResult, setFinalSawResult] = useState([]);
+  const [listHasilPerhitungan, setListHasilPerhitungan] = useState([]);
   const [disableWeight, setDisableWeight] = useState(false);
   const [hasilNormalisasi, setHasilNormalisasi] = useState([]);
 
@@ -57,7 +58,6 @@ const CountPage = (props) => {
 
   //for result table
   const [resultTableData, setResultTableData] = useState([]);
-  console.log(resultTableData);
 
   useEffect(() => {
     if (checkUpdate) {
@@ -248,9 +248,7 @@ const CountPage = (props) => {
       method: "POST",
       url: "http://localhost:3000/hasil/addHasil",
       data: dataHasil,
-    }).then((result) => {
-      console.log("test");
-    });
+    }).then((result) => {});
   };
 
   const handleCountFinalResult = (finalResult, allCountResult) => {
@@ -267,6 +265,8 @@ const CountPage = (props) => {
       };
       finalResult.push(data);
     });
+    console.log(allCountResult);
+    setListHasilPerhitungan(finalResult);
   };
 
   const handleUpdateVendor = () => {
@@ -592,8 +592,14 @@ const CountPage = (props) => {
             >
               <Button
                 onClick={() => {
-                  setDisableWeight(true);
-                  handleCountNormalisasi();
+                  if (vendorsData.length <= 3) {
+                    setMessageStatus(false);
+                    setPopupMessage("Please fill in at least 3 vendors");
+                    setPopupCondition(true);
+                  } else {
+                    setDisableWeight(true);
+                    handleCountNormalisasi();
+                  }
                 }}
                 variant="contained"
                 disabled={
@@ -637,40 +643,67 @@ const CountPage = (props) => {
           style={{
             margin: "16px auto",
             width: 450,
-            height: 100,
             padding: "12px",
             justifyContent: "center",
             borderRadius: "10px",
             boxShadow: "10px 10px 20px rgba(0, 0, 0, 0.2)",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              margin: "16px",
-            }}
-          >
-            <Typography fontSize={16} fontWeight={400}>
-              Rekomendasi Utama
-            </Typography>
-            <Typography fontSize={16} fontWeight={400}>
-              Hasil Skor
-            </Typography>
+          <div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                margin: "16px",
+              }}
+            >
+              <Typography fontSize={16} fontWeight={400}>
+                Rekomendasi Utama
+              </Typography>
+              <Typography fontSize={16} fontWeight={400}>
+                Hasil Skor
+              </Typography>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                margin: "8px",
+              }}
+            >
+              <Typography fontSize={24} fontWeight={600}>
+                {finalSawResult?.name}
+              </Typography>
+              <Typography fontSize={24} fontWeight={600}>
+                {finalSawResult?.value}
+              </Typography>
+            </div>
           </div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              margin: "8px",
-            }}
-          >
-            <Typography fontSize={24} fontWeight={600}>
-              {finalSawResult?.name}
+          <hr />
+          <div style={{ margin: "16px" }}>
+            <Typography fontWeight={600} fontSize={24}>
+              Data Perhitungan
             </Typography>
-            <Typography fontSize={24} fontWeight={600}>
-              {finalSawResult?.value}
-            </Typography>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Typography fontWeight={600}>No</Typography>
+              <Typography fontWeight={600}>Name</Typography>
+              <Typography fontWeight={600}>Result</Typography>
+            </div>
+            <div>
+              {listHasilPerhitungan.map((result, index) => {
+                return (
+                  <div
+                    style={{ display: "flex", justifyContent: "space-between" }}
+                  >
+                    <Typography>{`${index}. `}</Typography>
+                    <Typography>{result.name}</Typography>
+                    <Typography>
+                      {parseFloat(result.value.toFixed(2))}
+                    </Typography>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       ) : (
